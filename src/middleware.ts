@@ -1,3 +1,30 @@
+// import {
+//   convexAuthNextjsMiddleware,
+//   createRouteMatcher,
+//   isAuthenticatedNextjs,
+//   nextjsMiddlewareRedirect,
+// } from "@convex-dev/auth/nextjs/server";
+
+// const isPublicPage = createRouteMatcher(["/auth"]);
+
+// export default convexAuthNextjsMiddleware(async (request) => {
+//   const isAuthenticated = await isAuthenticatedNextjs();
+
+//   if (!isPublicPage(request) && !isAuthenticated) {
+//     return nextjsMiddlewareRedirect(request, "/auth");
+//   }
+
+//   if (isPublicPage(request) && isAuthenticated) {
+//     return nextjsMiddlewareRedirect(request, "/");
+//   }
+// });
+
+// export const config = {
+//   matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+// };
+
+
+
 import {
   convexAuthNextjsMiddleware,
   createRouteMatcher,
@@ -6,11 +33,12 @@ import {
 } from "@convex-dev/auth/nextjs/server";
 
 const isPublicPage = createRouteMatcher(["/auth"]);
+const isProtectedPage = createRouteMatcher(["/admin(.*)"]);
 
 export default convexAuthNextjsMiddleware(async (request) => {
   const isAuthenticated = await isAuthenticatedNextjs();
 
-  if (!isPublicPage(request) && !isAuthenticated) {
+  if (isProtectedPage(request) && !isAuthenticated) {
     return nextjsMiddlewareRedirect(request, "/auth");
   }
 
@@ -22,4 +50,3 @@ export default convexAuthNextjsMiddleware(async (request) => {
 export const config = {
   matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
 };
-
