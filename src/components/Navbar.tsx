@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export const Navbar = () => {
   return (
-    <nav className="flex items-center justify-between py-2 px-4 bg-gray-50 shadow-sm">
+    <nav className="flex items-center justify-between py-2 px-4 bg-green-50 shadow-sm">
       <div className="flex items-center pl-4">
         <Link href="/" className="flex items-center group">
           <Image
@@ -47,4 +47,3 @@ export const Navbar = () => {
     </nav>
   );
 };
-
