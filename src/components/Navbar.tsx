@@ -1,9 +1,17 @@
+"use client";
+
 import Image from "next/image";
 import { UserButton } from "@/features/auth/components/user-button";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useCurrentUser } from "@/features/auth/api/use-current-user";
 
 export const Navbar = () => {
+  const { data: user } = useCurrentUser();
+
+  // Determine dashboard link based on authentication status
+  const dashboardLink = user ? "/admin/dashboard" : "/dashboard";
+
   return (
     <nav className="flex items-center justify-between py-2 px-4 bg-green-50 shadow-sm">
       <div className="flex items-center pl-4">
@@ -40,7 +48,7 @@ export const Navbar = () => {
           className="text-neutral-700 hover:text-[#195a5a] hover:bg-[#195a5a]/10 transition-all duration-300"
           asChild
         >
-          <Link href="/dashboard">Dashboard</Link>
+          <Link href={dashboardLink}>Dashboard</Link>
         </Button>
         <UserButton />
       </div>
