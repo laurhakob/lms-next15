@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-export default function AdminPage() {
+export default function AdminDashboardPage() {
   const [timeRange, setTimeRange] = useState<"3months" | "30days" | "7days">("3months");
 
   const allData = {
