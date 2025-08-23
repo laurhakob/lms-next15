@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -6,7 +7,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import TextAlign from "@tiptap/extension-text-align";
+import { 
+  Bold, 
+  Italic, 
+  Strikethrough, 
+  Heading1, 
+  Heading2, 
+  Heading3, 
+  List, 
+  ListOrdered, 
+  AlignLeft, 
+  AlignCenter, 
+  AlignRight, 
+  Undo, 
+  Redo 
+} from "lucide-react";
 import { ArrowLeft, SparkleIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import slugify from "slugify";
@@ -57,6 +75,19 @@ export default function CreateCoursePage() {
     } catch (error) {
       console.error("Error creating course:", error);
     }
+  };
+
+  const editor = useEditor({
+    extensions: [StarterKit, TextAlign.configure({ types: ["heading", "paragraph"] })],
+    content: description,
+    onUpdate: ({ editor }) => {
+      setDescription(editor.getHTML());
+    },
+    immediatelyRender: false,
+  });
+
+  const isActive = (check: () => boolean | undefined): string => {
+    return editor ? (check() ? "bg-[#195a5a]/60 text-white font-bold" : "text-gray-300 hover:bg-[#195a5a]/20") : "text-gray-300 hover:bg-[#195a5a]/20";
   };
 
   return (
@@ -128,13 +159,94 @@ export default function CreateCoursePage() {
               <Label htmlFor="description" className="text-sm font-semibold text-[#195a5a]">
                 Description
               </Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe your course in detail"
-                className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] min-h-[150px] rounded-md shadow-sm transition-all duration-300"
-              />
+              <div className="border border-[#195a5a]/20 bg-white/50 rounded-md shadow-sm focus-within:outline-none">
+                <div className="flex items-center px-2 py-1 bg-gradient-to-r from-[#195a5a] to-[#2a7b7b] text-white">
+                  <button
+                    onClick={() => editor?.chain().focus().toggleBold().run()}
+                    className={`px-2 py-1 rounded ${isActive(() => editor?.isActive("bold"))}`}
+                  >
+                    <Bold className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().toggleItalic().run()}
+                    className={`px-2 py-1 rounded ${isActive(() => editor?.isActive("italic"))}`}
+                  >
+                    <Italic className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().toggleStrike().run()}
+                    className={`px-2 py-1 rounded ${isActive(() => editor?.isActive("strike"))}`}
+                  >
+                    <Strikethrough className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+                    className={`px-2 py-1 rounded ${isActive(() => editor?.isActive("heading", { level: 1 }))}`}
+                  >
+                    <Heading1 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+                    className={`px-2 py-1 rounded ${isActive(() => editor?.isActive("heading", { level: 2 }))}`}
+                  >
+                    <Heading2 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
+                    className={`px-2 py-1 rounded ${isActive(() => editor?.isActive("heading", { level: 3 }))}`}
+                  >
+                    <Heading3 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                    className={`px-2 py-1 rounded ${isActive(() => editor?.isActive("bulletList"))}`}
+                  >
+                    <List className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+                    className={`px-2 py-1 rounded ${isActive(() => editor?.isActive("orderedList"))}`}
+                  >
+                    <ListOrdered className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().setTextAlign("left").run()}
+                    className={`px-2 py-1 rounded ${isActive(() => editor?.isActive({ textAlign: "left" }))}`}
+                  >
+                    <AlignLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().setTextAlign("center").run()}
+                    className={`px-2 py-1 rounded ${isActive(() => editor?.isActive({ textAlign: "center" }))}`}
+                  >
+                    <AlignCenter className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().setTextAlign("right").run()}
+                    className={`px-2 py-1 rounded ${isActive(() => editor?.isActive({ textAlign: "right" }))}`}
+                  >
+                    <AlignRight className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().undo().run()}
+                    className={`px-2 py-1 rounded ${isActive(() => false)}`}
+                    disabled={!editor?.can().undo()}
+                  >
+                    <Undo className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => editor?.chain().focus().redo().run()}
+                    className={`px-2 py-1 rounded ${isActive(() => false)}`}
+                    disabled={!editor?.can().redo()}
+                  >
+                    <Redo className="w-5 h-5" />
+                  </button>
+                </div>
+                <EditorContent
+                  editor={editor}
+                  className="p-2 min-h-[150px] focus-within:outline-none bg-white/50"
+                />
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -265,3 +377,5 @@ export default function CreateCoursePage() {
     </div>
   );
 }
+
+
