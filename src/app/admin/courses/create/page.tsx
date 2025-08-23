@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -46,7 +45,6 @@ export default function CreateCoursePage() {
         price: parseFloat(price),
         status,
       });
-      // Reset form or redirect
       setTitle("");
       setSlug("");
       setDescription("");
@@ -62,201 +60,208 @@ export default function CreateCoursePage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 p-8 bg-green-50 min-h-screen">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          className="text-neutral-700 hover:text-[#195a5a] hover:bg-[#195a5a]/10 transition-all duration-300"
-          asChild
-        >
-          <Link href="/admin/dashboard">
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Back
-          </Link>
-        </Button>
-        <h1 className="text-3xl font-bold text-neutral-900">Create Course</h1>
-      </div>
-      <Card className="border border-green-200 bg-green-100 shadow-md hover:shadow-lg transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="text-xl text-green-700">Course Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <p className="text-sm text-neutral-600">Fill in the details to create a new course.</p>
-          
-          <div className="space-y-2">
-            <Label htmlFor="title" className="text-sm font-medium text-neutral-900">
-              Title
-            </Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter course title"
-              className="border-green-200 focus:ring-[#195a5a] focus:border-[#195a5a] transition-all duration-300"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="slug" className="text-sm font-medium text-neutral-900">
-              Slug
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="slug"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                placeholder="Enter course slug"
-                className="border-green-200 focus:ring-[#195a5a] focus:border-[#195a5a] transition-all duration-300"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                className="border-green-200 text-green-700 hover:bg-green-50"
-                onClick={handleGenerateSlug}
-              >
-                <SparkleIcon className="w-4 h-4 mr-2" />
-                Generate Slug
-              </Button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description" className="text-sm font-medium text-neutral-900">
-              Description
-            </Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter course description"
-              className="border-green-200 focus:ring-[#195a5a] focus:border-[#195a5a] min-h-[120px] transition-all duration-300"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="thumbnail" className="text-sm font-medium text-neutral-900">
-              Thumbnail Image
-            </Label>
-            <Input
-              id="thumbnail"
-              value={thumbnail}
-              onChange={(e) => setThumbnail(e.target.value)}
-              placeholder="Enter thumbnail URL"
-              className="border-green-200 focus:ring-[#195a5a] focus:border-[#195a5a] transition-all duration-300"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="category" className="text-sm font-medium text-neutral-900">
-                Category
-              </Label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="border-green-200 focus:ring-[#195a5a] focus:border-[#195a5a] transition-all duration-300">
-                  <SelectValue placeholder="Select Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[
-                    "Development",
-                    "Business",
-                    "Finance",
-                    "IT & Software",
-                    "Office Productivity",
-                    "Design",
-                    "Marketing",
-                    "Health & Fitness",
-                    "Music",
-                    "Teaching & Academics",
-                  ].map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="level" className="text-sm font-medium text-neutral-900">
-                Level
-              </Label>
-              <Select value={level} onValueChange={setLevel}>
-                <SelectTrigger className="border-green-200 focus:ring-[#195a5a] focus:border-[#195a5a] transition-all duration-300">
-                  <SelectValue placeholder="Select Level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {["Beginner", "Intermediate", "Advanced"].map((lvl) => (
-                    <SelectItem key={lvl} value={lvl}>
-                      {lvl}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="duration" className="text-sm font-medium text-neutral-900">
-                Duration (hours)
-              </Label>
-              <Input
-                id="duration"
-                type="number"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                placeholder="Duration"
-                className="border-green-200 focus:ring-[#195a5a] focus:border-[#195a5a] transition-all duration-300"
-                min="0"
-                step="0.1"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="price" className="text-sm font-medium text-neutral-900">
-                Price ($)
-              </Label>
-              <Input
-                id="price"
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder="Price"
-                className="border-green-200 focus:ring-[#195a5a] focus:border-[#195a5a] transition-all duration-300"
-                min="0"
-                step="0.01"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="status" className="text-sm font-medium text-neutral-900">
-              Status
-            </Label>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="border-green-200 focus:ring-[#195a5a] focus:border-[#195a5a] transition-all duration-300">
-                <SelectValue placeholder="Select Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {["Draft", "Published", "Archived"].map((stat) => (
-                  <SelectItem key={stat} value={stat}>
-                    {stat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-[#e6f4ea] to-[#c3e6cb] p-8">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <div className="flex items-center gap-4">
           <Button
-            type="submit"
-            className="w-full bg-[#195a5a] text-white hover:bg-[#195a5a]/90 transition-all duration-300"
-            onClick={handleSubmit}
+            variant="outline"
+            className="border-[#195a5a]/30 bg-white/80 text-[#195a5a] hover:bg-[#195a5a] hover:text-white transition-all duration-300 shadow-sm backdrop-blur-sm"
+            asChild
           >
-            <PlusIcon className="w-4 h-4 mr-2" />
-            Create Course
+            <Link href="/admin/dashboard">
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back to Dashboard
+            </Link>
           </Button>
-        </CardContent>
-      </Card>
+          <h1 className="text-4xl font-extrabold text-[#195a5a] tracking-tight animate-fade-in">
+            Create a New Course
+          </h1>
+        </div>
+        <Card className="border-none bg-white/90 shadow-xl rounded-xl overflow-hidden backdrop-blur-md transition-all duration-300 hover:shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-[#195a5a] to-[#2a7b7b] p-6">
+            <CardTitle className="text-2xl font-bold text-white">
+              Course Details
+            </CardTitle>
+            <p className="text-sm text-white/80 mt-1">
+              Fill in the details to create an engaging course.
+            </p>
+          </CardHeader>
+          <CardContent className="p-8 space-y-8">
+            <div className="space-y-3">
+              <Label htmlFor="title" className="text-sm font-semibold text-[#195a5a]">
+                Course Title
+              </Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter course title"
+                className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] rounded-md shadow-sm transition-all duration-300"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="slug" className="text-sm font-semibold text-[#195a5a]">
+                Slug
+              </Label>
+              <div className="flex gap-3">
+                <Input
+                  id="slug"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  placeholder="Enter course slug"
+                  className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] rounded-md shadow-sm transition-all duration-300"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-[#195a5a]/30 bg-white/80 text-[#195a5a] hover:bg-[#195a5a] hover:text-white transition-all duration-300 shadow-sm"
+                  onClick={handleGenerateSlug}
+                >
+                  <SparkleIcon className="w-4 h-4 mr-2" />
+                  Generate Slug
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="description" className="text-sm font-semibold text-[#195a5a]">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe your course in detail"
+                className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] min-h-[150px] rounded-md shadow-sm transition-all duration-300"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="thumbnail" className="text-sm font-semibold text-[#195a5a]">
+                Thumbnail Image
+              </Label>
+              <Input
+                id="thumbnail"
+                value={thumbnail}
+                onChange={(e) => setThumbnail(e.target.value)}
+                placeholder="Enter thumbnail URL"
+                className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] rounded-md shadow-sm transition-all duration-300"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label htmlFor="category" className="text-sm font-semibold text-[#195a5a]">
+                  Category
+                </Label>
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] rounded-md shadow-sm transition-all duration-300">
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white/90 backdrop-blur-md border-[#195a5a]/20">
+                    {[
+                      "Development",
+                      "Business",
+                      "Finance",
+                      "IT & Software",
+                      "Office Productivity",
+                      "Design",
+                      "Marketing",
+                      "Health & Fitness",
+                      "Music",
+                      "Teaching & Academics",
+                    ].map((cat) => (
+                      <SelectItem key={cat} value={cat} className="hover:bg-[#195a5a]/10">
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="level" className="text-sm font-semibold text-[#195a5a]">
+                  Level
+                </Label>
+                <Select value={level} onValueChange={setLevel}>
+                  <SelectTrigger className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] rounded-md shadow-sm transition-all duration-300">
+                    <SelectValue placeholder="Select Level" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white/90 backdrop-blur-md border-[#195a5a]/20">
+                    {["Beginner", "Intermediate", "Advanced"].map((lvl) => (
+                      <SelectItem key={lvl} value={lvl} className="hover:bg-[#195a5a]/10">
+                        {lvl}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label htmlFor="duration" className="text-sm font-semibold text-[#195a5a]">
+                  Duration (hours)
+                </Label>
+                <Input
+                  id="duration"
+                  type="number"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  placeholder="Enter duration"
+                  className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] rounded-md shadow-sm transition-all duration-300"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="price" className="text-sm font-semibold text-[#195a5a]">
+                  Price ($)
+                </Label>
+                <Input
+                  id="price"
+                  type="number"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="Enter price"
+                  className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] rounded-md shadow-sm transition-all duration-300"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="status" className="text-sm font-semibold text-[#195a5a]">
+                Status
+              </Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] rounded-md shadow-sm transition-all duration-300">
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
+                <SelectContent className="bg-white/90 backdrop-blur-md border-[#195a5a]/20">
+                  {["Draft", "Published", "Archived"].map((stat) => (
+                    <SelectItem key={stat} value={stat} className="hover:bg-[#195a5a]/10">
+                      {stat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-[#195a5a] to-[#2a7b7b] text-white hover:from-[#2a7b7b] hover:to-[#195a5a] transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1"
+              onClick={handleSubmit}
+            >
+              <PlusIcon className="w-5 h-5 mr-2" />
+              Create Course
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
