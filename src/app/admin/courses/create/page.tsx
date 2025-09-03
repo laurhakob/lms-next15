@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,19 +22,22 @@ import {
   AlignCenter, 
   AlignRight, 
   Undo, 
-  Redo 
+  Redo, 
+  Upload 
 } from "lucide-react";
 import { ArrowLeft, SparkleIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import slugify from "slugify";
 import { useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
+import { useDropzone } from "react-dropzone";
+import Image from "next/image";
 
 export default function CreateCoursePage() {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
-  const [thumbnail, setThumbnail] = useState("");
+  const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [category, setCategory] = useState("");
   const [level, setLevel] = useState("Beginner");
   const [duration, setDuration] = useState("");
@@ -56,7 +58,7 @@ export default function CreateCoursePage() {
         title,
         slug,
         description,
-        thumbnail,
+        thumbnail: thumbnail || "",
         category,
         level,
         duration: parseFloat(duration),
@@ -66,7 +68,7 @@ export default function CreateCoursePage() {
       setTitle("");
       setSlug("");
       setDescription("");
-      setThumbnail("");
+      setThumbnail(null);
       setCategory("");
       setLevel("Beginner");
       setDuration("");
@@ -89,6 +91,23 @@ export default function CreateCoursePage() {
   const isActive = (check: () => boolean | undefined): string => {
     return editor ? (check() ? "bg-[#195a5a]/60 text-white font-bold" : "text-gray-300 hover:bg-[#195a5a]/20") : "text-gray-300 hover:bg-[#195a5a]/20";
   };
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setThumbnail(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "image/*": [] },
+    multiple: false,
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e6f4ea] to-[#c3e6cb] p-8">
@@ -249,17 +268,42 @@ export default function CreateCoursePage() {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-6">
               <Label htmlFor="thumbnail" className="text-sm font-semibold text-[#195a5a]">
                 Thumbnail Image
               </Label>
-              <Input
-                id="thumbnail"
-                value={thumbnail}
-                onChange={(e) => setThumbnail(e.target.value)}
-                placeholder="Enter thumbnail URL"
-                className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] rounded-md shadow-sm transition-all duration-300"
-              />
+              <div
+                {...getRootProps()}
+                className={`border-2 border-dashed border-[#195a5a]/30 bg-white/70 rounded-lg p-6 text-center transition-all duration-300 ${
+                  isDragActive ? "bg-[#e6f4ea] border-[#195a5a]/50" : ""
+                }`}
+              >
+                <input {...getInputProps()} />
+                <div className="flex flex-col items-center space-y-4">
+                  {thumbnail ? (
+                    <Image
+                      src={thumbnail}
+                      alt="Thumbnail Preview"
+                      width={200}
+                      height={150}
+                      className="rounded-lg shadow-md object-cover"
+                    />
+                  ) : (
+                    <>
+                      <Upload className="mx-auto text-[#195a5a] w-16 h-16 mb-2 animate-pulse" />
+                      <p className="text-lg text-[#2a7b7b] mb-2">
+                        Drop your files here or click to upload
+                      </p>
+                    </>
+                  )}
+                  <Button
+                    variant="outline"
+                    className="border-[#195a5a]/30 bg-white/80 text-[#195a5a] hover:bg-[#195a5a] hover:text-white transition-all duration-300 shadow-md"
+                  >
+                    Select File
+                  </Button>
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -377,5 +421,3 @@ export default function CreateCoursePage() {
     </div>
   );
 }
-
-
