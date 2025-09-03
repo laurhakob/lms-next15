@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,11 +29,12 @@ import {
 import { ArrowLeft, SparkleIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import slugify from "slugify";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Id } from "../../../../../convex/_generated/dataModel"; // Import Id type
 
 export default function CreateCoursePage() {
   const [title, setTitle] = useState("");
@@ -46,7 +47,16 @@ export default function CreateCoursePage() {
   const [price, setPrice] = useState("");
   const [status, setStatus] = useState("");
   const createCourse = useMutation(api.courses.create);
+  const updateCourse = useMutation(api.courses.update);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("edit");
+
+  // Safely handle the query argument
+  const courseQuery = useQuery(
+    api.courses.getCourseById,
+    editId ? { id: editId as Id<"courses"> } : "skip" // Use "skip" instead of null
+  );
 
   const handleGenerateSlug = () => {
     if (title) {
@@ -57,22 +67,52 @@ export default function CreateCoursePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createCourse({
-        title,
-        slug,
-        description,
-        thumbnail: thumbnail || "",
-        category,
-        level,
-        duration: parseFloat(duration),
-        price: parseFloat(price),
-        status,
-      });
-      router.push("/admin/courses"); // Redirect to Courses page after creation
+      if (editId) {
+        await updateCourse({
+          id: editId as Id<"courses">,
+          title,
+          slug,
+          description,
+          thumbnail: thumbnail || undefined,
+          category,
+          level,
+          duration: duration ? parseFloat(duration) : undefined,
+          price: price ? parseFloat(price) : undefined,
+          status,
+        });
+        router.push("/admin/courses");
+      } else {
+        await createCourse({
+          title,
+          slug,
+          description,
+          thumbnail: thumbnail || "",
+          category,
+          level,
+          duration: parseFloat(duration),
+          price: parseFloat(price),
+          status,
+        });
+        router.push("/admin/courses");
+      }
     } catch (error) {
-      console.error("Error creating course:", error);
+      console.error("Error creating/updating course:", error);
     }
   };
+
+  useEffect(() => {
+    if (courseQuery) {
+      setTitle(courseQuery.title || "");
+      setSlug(courseQuery.slug || "");
+      setDescription(courseQuery.description || "");
+      setThumbnail(courseQuery.thumbnail || null);
+      setCategory(courseQuery.category || "");
+      setLevel(courseQuery.level || "Beginner");
+      setDuration(courseQuery.duration ? courseQuery.duration.toString() : "");
+      setPrice(courseQuery.price ? courseQuery.price.toString() : "");
+      setStatus(courseQuery.status || "");
+    }
+  }, [courseQuery]);
 
   const editor = useEditor({
     extensions: [StarterKit, TextAlign.configure({ types: ["heading", "paragraph"] })],
@@ -123,16 +163,16 @@ export default function CreateCoursePage() {
             </Link>
           </Button>
           <h1 className="text-4xl font-extrabold text-[#195a5a] tracking-tight animate-fade-in">
-            Create a New Course
+            {editId ? "Edit Course" : "Create a New Course"}
           </h1>
         </div>
         <Card className="border-none bg-white/90 shadow-xl rounded-xl overflow-hidden backdrop-blur-md transition-all duration-300 hover:shadow-2xl">
           <CardHeader className="bg-gradient-to-r from-[#195a5a] to-[#2a7b7b] p-6">
             <CardTitle className="text-2xl font-bold text-white">
-              Course Details
+              {editId ? "Edit Course Details" : "Course Details"}
             </CardTitle>
             <p className="text-sm text-white/80 mt-1">
-              Fill in the details to create an engaging course.
+              {editId ? "Update the details of your course." : "Fill in the details to create an engaging course."}
             </p>
           </CardHeader>
           <CardContent className="p-8 space-y-8">
@@ -425,7 +465,7 @@ export default function CreateCoursePage() {
               onClick={handleSubmit}
             >
               <PlusIcon className="w-5 h-5 mr-2" />
-              Create Course
+              {editId ? "Update Course" : "Create Course"}
             </Button>
           </CardContent>
         </Card>
