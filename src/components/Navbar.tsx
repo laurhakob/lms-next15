@@ -9,8 +9,8 @@ import { useCurrentUser } from "@/features/auth/api/use-current-user";
 export const Navbar = () => {
   const { data: user } = useCurrentUser();
 
-  // Determine dashboard link based on authentication status
-  const dashboardLink = user ? "/admin/dashboard" : "/dashboard";
+  // Determine courses link based on authentication status
+  const coursesLink = user ? "/admin/courses" : "/courses";
 
   return (
     <nav className="flex items-center justify-between py-2 px-4 bg-green-50 shadow-sm">
@@ -41,14 +41,14 @@ export const Navbar = () => {
           className="text-neutral-700 hover:text-[#195a5a] hover:bg-[#195a5a]/10 transition-all duration-300"
           asChild
         >
-          <Link href="/courses">Courses</Link>
+          <Link href={coursesLink}>Courses</Link>
         </Button>
         <Button
           variant="ghost"
           className="text-neutral-700 hover:text-[#195a5a] hover:bg-[#195a5a]/10 transition-all duration-300"
           asChild
         >
-          <Link href={dashboardLink}>Dashboard</Link>
+          <Link href={user ? "/admin/dashboard" : "/dashboard"}>Dashboard</Link>
         </Button>
         <UserButton />
       </div>
