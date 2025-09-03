@@ -23,7 +23,8 @@ import {
   AlignRight, 
   Undo, 
   Redo, 
-  Upload 
+  Upload, 
+  Trash2 
 } from "lucide-react";
 import { ArrowLeft, SparkleIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
@@ -108,6 +109,10 @@ export default function CreateCoursePage() {
     accept: { "image/*": [] },
     multiple: false,
   });
+
+  const handleDeleteThumbnail = () => {
+    setThumbnail(null);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e6f4ea] to-[#c3e6cb] p-8">
@@ -281,13 +286,26 @@ export default function CreateCoursePage() {
                 <input {...getInputProps()} />
                 <div className="flex flex-col items-center space-y-4">
                   {thumbnail ? (
-                    <Image
-                      src={thumbnail}
-                      alt="Thumbnail Preview"
-                      width={200}
-                      height={150}
-                      className="rounded-lg shadow-md object-cover"
-                    />
+                    <div className="relative">
+                      <Image
+                        src={thumbnail}
+                        alt="Thumbnail Preview"
+                        width={200}
+                        height={150}
+                        className="rounded-lg shadow-md object-cover"
+                      />
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 bg-red-500/80 hover:bg-red-600 text-white rounded-full w-8 h-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteThumbnail();
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   ) : (
                     <>
                       <Upload className="mx-auto text-[#195a5a] w-16 h-16 mb-2 animate-pulse" />
@@ -366,7 +384,7 @@ export default function CreateCoursePage() {
                   value={duration}
                   onChange={(e) => setDuration(e.target.value)}
                   placeholder="Enter duration"
-                  className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] rounded-md shadow-sm transition-all duration-300"
+                  className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] rounded-md shadow-md transition-all duration-300"
                   min="0"
                   step="0.1"
                 />
@@ -382,7 +400,7 @@ export default function CreateCoursePage() {
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="Enter price"
-                  className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] rounded-md shadow-sm transition-all duration-300"
+                  className="border-[#195a5a]/20 bg-white/50 focus:ring-[#195a5a] focus:border-[#195a5a] rounded-md shadow-md transition-all duration-300"
                   min="0"
                   step="0.01"
                 />
