@@ -33,6 +33,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function CreateCoursePage() {
   const [title, setTitle] = useState("");
@@ -45,6 +46,7 @@ export default function CreateCoursePage() {
   const [price, setPrice] = useState("");
   const [status, setStatus] = useState("");
   const createCourse = useMutation(api.courses.create);
+  const router = useRouter();
 
   const handleGenerateSlug = () => {
     if (title) {
@@ -66,15 +68,7 @@ export default function CreateCoursePage() {
         price: parseFloat(price),
         status,
       });
-      setTitle("");
-      setSlug("");
-      setDescription("");
-      setThumbnail(null);
-      setCategory("");
-      setLevel("Beginner");
-      setDuration("");
-      setPrice("");
-      setStatus("");
+      router.push("/admin/courses"); // Redirect to Courses page after creation
     } catch (error) {
       console.error("Error creating course:", error);
     }
