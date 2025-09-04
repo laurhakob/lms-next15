@@ -1,8 +1,9 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusIcon, MoreVertical } from "lucide-react";
+import { PlusIcon, MoreVertical, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
@@ -18,21 +19,22 @@ import {
 import { useMutation } from "convex/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Id } from "../../../../convex/_generated/dataModel"; // Import Id type
+import { Id } from "../../../../convex/_generated/dataModel";
 import { Edit, Trash2 } from "lucide-react";
+
+// Function to extract plain text from HTML
+const extractPlainText = (html: string) => {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = html;
+  return tempDiv.textContent || tempDiv.innerText || "";
+};
 
 export default function CoursesPage() {
   const courses = useQuery(api.courses.getUserCourses);
   const deleteCourse = useMutation(api.courses.deleteCourse);
   const router = useRouter();
-  const [isConfirmingDelete, setIsConfirmingDelete] = useState<Id<"courses"> | null>(null);
-
-  // Function to extract plain text from HTML
-  const extractPlainText = (html: string) => {
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = html;
-    return tempDiv.textContent || tempDiv.innerText || "";
-  };
+  const [isConfirmingDelete, setIsConfirmingDelete] =
+    useState<Id<"courses"> | null>(null);
 
   const handleDeleteConfirm = (courseId: Id<"courses">) => {
     setIsConfirmingDelete(courseId);
@@ -96,9 +98,7 @@ export default function CoursesPage() {
                         className="w-full h-48 object-cover"
                       />
                       <div className="absolute top-2 right-2 flex items-center space-x-2">
-                        <Badge
-                          className="bg-[#195a5a]/80 text-white rounded-full px-3 py-1"
-                        >
+                        <Badge className="bg-[#195a5a]/80 text-white rounded-full px-3 py-1">
                           {course.status}
                         </Badge>
                         <DropdownMenu>
@@ -113,7 +113,11 @@ export default function CoursesPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-40">
                             <DropdownMenuItem
-                              onClick={() => router.push(`/admin/courses/create?edit=${course._id}`)}
+                              onClick={() =>
+                                router.push(
+                                  `/admin/courses/create?edit=${course._id}`
+                                )
+                              }
                               className="text-[#195a5a] hover:bg-[#195a5a]/10"
                             >
                               <Edit className="w-4 h-4 mr-2" />
@@ -133,7 +137,8 @@ export default function CoursesPage() {
                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                           <Card className="bg-white p-4 rounded-lg shadow-lg">
                             <p className="text-lg text-[#195a5a] mb-2">
-                              Are you sure you want to delete &quot;{course.title}&quot;?
+                              Are you sure you want to delete &quot;
+                              {course.title}&quot;?
                             </p>
                             <div className="flex justify-end gap-2">
                               <Button
@@ -156,8 +161,12 @@ export default function CoursesPage() {
                       )}
                     </div>
                     <CardContent className="p-4">
-                      <h3 className="text-xl font-semibold text-[#195a5a] mb-2">{course.title}</h3>
-                      <p className="text-sm text-[#2a7b7b]/80 mb-3 line-clamp-2">{extractPlainText(course.description)}</p>
+                      <h3 className="text-xl font-semibold text-[#195a5a] mb-2">
+                        {course.title}
+                      </h3>
+                      <p className="text-sm text-[#2a7b7b]/80 mb-3 line-clamp-2">
+                        {extractPlainText(course.description)}
+                      </p>
                       <div className="flex items-center gap-4 text-sm text-[#195a5a]">
                         <div className="flex items-center">
                           <Clock className="w-4 h-4 mr-1" />
@@ -168,6 +177,16 @@ export default function CoursesPage() {
                           <span>{course.level}</span>
                         </div>
                       </div>
+                      <Button
+                        type="button"
+                        className="w-full mt-4 bg-gradient-to-r from-[#195a5a] to-[#2a7b7b] text-white hover:from-[#2a7b7b] hover:to-[#195a5a] transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1 flex items-center justify-center gap-2"
+                        onClick={() =>
+                          router.push(`/admin/courses/${course._id}`)
+                        }
+                      >
+                        Go to the course
+                        <ArrowRight className="w-5 h-5" />
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
