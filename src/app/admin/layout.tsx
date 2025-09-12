@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   CirclePlus, 
@@ -13,6 +13,8 @@ import {
   HelpCircle, 
   Search,
   Loader,
+  Menu,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -22,25 +24,44 @@ import { DottedSeparator } from "@/components/dotted-separator";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const { data: user, isLoading } = useCurrentUser();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#195a5a] to-[#2a7b7b] text-white flex">
+    <div className="min-h-screen bg-gradient-to-b from-[#195a5a] to-[#2a7b7b] text-white flex relative">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#195a5a]/80 backdrop-blur-sm border-r border-white/20 flex flex-col justify-between p-6">
+      <aside
+        className={`fixed top-0 left-0 h-full z-50 bg-[#195a5a]/80 backdrop-blur-sm border-r border-white/20 flex flex-col justify-between p-6 transition-all duration-300 ease-in-out overflow-y-auto ${
+          isSidebarOpen ? "w-64 translate-x-0" : "w-0 -translate-x-full"
+        }`}
+      >
         {/* Logo and LMS Text */}
         <div>
-          <Link href="/" className="flex items-center mb-8 group">
-            <Image
-              src="/logo.svg"
-              alt="Logo"
-              width={40}
-              height={40}
-              className="mr-2 cursor-pointer group-hover:scale-105 transition-transform duration-300"
-            />
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-200 group-hover:brightness-125 transition-all duration-300">
-              LMS
-            </span>
-          </Link>
+          <div className="flex items-center justify-between mb-6">
+            <Link href="/" className="flex items-center group">
+              <Image
+                src="/logo.svg"
+                alt="Logo"
+                width={40}
+                height={40}
+                className="mr-2 cursor-pointer group-hover:scale-105 transition-transform duration-300"
+              />
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-200 group-hover:brightness-125 transition-all duration-300">
+                LMS
+              </span>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/10 hover:text-white transition-all duration-300"
+              onClick={toggleSidebar}
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
           <DottedSeparator className="mb-6" color="rgba(255,255,255,0.3)" />
           
           {/* Navigation Buttons */}
@@ -165,7 +186,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-8 bg-green-50">
+      <main className={`flex-1 p-8 bg-green-50 transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-0"}`}>
+        {!isSidebarOpen && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="fixed top-4 left-4 text-[#195a5a] hover:bg-[#195a5a]/10 hover:text-[#195a5a] transition-all duration-300 shadow-md rounded-full bg-white/80 backdrop-blur-sm z-50"
+            onClick={toggleSidebar}
+          >
+            <Menu className="w-6 h-6" />
+          </Button>
+        )}
         {children}
       </main>
     </div>
