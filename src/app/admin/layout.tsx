@@ -2,15 +2,15 @@
 
 import { ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  CirclePlus, 
-  LayoutDashboard, 
-  List, 
-  BarChart2, 
-  File, 
-  Users, 
-  Settings, 
-  HelpCircle, 
+import {
+  CirclePlus,
+  LayoutDashboard,
+  List,
+  BarChart2,
+  File,
+  Users,
+  Settings,
+  HelpCircle,
   Search,
   Loader,
   Menu,
@@ -63,7 +63,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </Button>
           </div>
           <DottedSeparator className="mb-6" color="rgba(255,255,255,0.3)" />
-          
+
           {/* Navigation Buttons */}
           <nav className="space-y-2">
             <Button
@@ -177,8 +177,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <p className="text-sm font-medium text-white">{user?.name || "User"}</p>
-                <p className="text-xs text-white/70">{user?.email || "No email"}</p>
+                <p className="text-sm font-medium text-white">
+                  {user?.name || "User"}
+                </p>
+                <p className="text-xs text-white/70">
+                  {user?.email || "No email"}
+                </p>
               </div>
             </div>
           )}
@@ -186,7 +190,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className={`flex-1 p-8 bg-green-50 transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-0"}`}>
+      <main
+        className={`flex-1 p-8 bg-green-50 transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-0"}`}
+      >
         {!isSidebarOpen && (
           <Button
             variant="ghost"
