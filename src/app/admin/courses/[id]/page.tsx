@@ -14,10 +14,11 @@ import {
   ArrowLeft,
   PlusIcon,
   Trash2,
+ 
   Folder,
   FileText,
 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -48,41 +49,41 @@ import { Separator } from "@/components/ui/separator";
 const SortableLesson = ({
   lesson,
   setConfirmingDeleteLesson,
+  courseId,
 }: {
   lesson: { _id: Id<"lessons">; title: string; order: number };
-  setConfirmingDeleteLesson: (
-    data: { id: Id<"lessons">; title: string } | null
-  ) => void;
+  setConfirmingDeleteLesson: (data: { id: Id<"lessons">; title: string } | null) => void;
+  courseId: Id<"courses">;
 }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: lesson._id });
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: lesson._id });
   const style = { transform: CSS.Transform.toString(transform), transition };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setConfirmingDeleteLesson({ id: lesson._id, title: lesson.title });
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <Card className="mb-2 border border-[#195a5a]/10 bg-white/80 shadow-sm rounded-md overflow-hidden transition-all duration-300 hover:shadow-md flex items-center">
-        <FileText className="w-6 h-6 text-[#195a5a] ml-3 mr-2" />
-        <CardHeader className="bg-gradient-to-r from-[#d1e8d5] to-[#b3d9b9] p-3 flex-1">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold text-[#195a5a]">
-              Lesson {lesson.order}: {lesson.title}
-            </CardTitle>
-            <Button
-              variant="destructive"
-              size="icon"
-              className="bg-red-500/80 hover:bg-red-600 text-white rounded-md w-8 h-8"
-              onClick={handleDeleteConfirm}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
-        </CardHeader>
-      </Card>
-    </div>
+    <Link href={`/admin/courses/${courseId}/lessons/${lesson._id}`}>
+      <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="cursor-pointer">
+        <Card className="mb-2 border border-[#195a5a]/10 bg-white/80 shadow-sm rounded-md overflow-hidden transition-all duration-300 hover:shadow-md flex items-center">
+          <FileText className="w-6 h-6 text-[#195a5a] ml-3 mr-2" />
+          <CardHeader className="bg-gradient-to-r from-[#d1e8d5] to-[#b3d9b9] p-3 flex-1">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-semibold text-[#195a5a]">Lesson {lesson.order}: {lesson.title}</CardTitle>
+              <Button
+                variant="destructive"
+                size="icon"
+                className="bg-red-500/80 hover:bg-red-600 text-white rounded-md w-8 h-8"
+                onClick={handleDeleteConfirm}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardHeader>
+        </Card>
+      </div>
+    </Link>
   );
 };
 
@@ -93,6 +94,7 @@ const SortableChapter = ({
   setLessonTitle,
   setConfirmingDeleteChapterId,
   setConfirmingDeleteLesson,
+  courseId,
 }: {
   chapter: {
     _id: Id<"chapters">;
@@ -102,16 +104,13 @@ const SortableChapter = ({
   setCreatingLessonChapterId: (id: Id<"chapters">) => void;
   setLessonTitle: (title: string) => void;
   setConfirmingDeleteChapterId: (id: Id<"chapters"> | null) => void;
-  setConfirmingDeleteLesson: (
-    data: { id: Id<"lessons">; title: string } | null
-  ) => void;
+  setConfirmingDeleteLesson: (data: { id: Id<"lessons">; title: string } | null) => void;
+  courseId: Id<"courses">;
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: chapter._id });
 
-  const lessons = useQuery(api.lessons.getChapterStructure, {
-    chapterId: chapter._id,
-  });
+  const lessons = useQuery(api.lessons.getChapterStructure, { chapterId: chapter._id });
   const updateLessonOrder = useMutation(api.lessons.updateLessonOrder);
 
   const sensors = useSensors(
@@ -131,12 +130,7 @@ const SortableChapter = ({
           chapterId: chapter._id,
           lessons: lessons.map((lesson, index) => ({
             _id: lesson._id,
-            order:
-              index === oldIndex
-                ? newIndex + 1
-                : index === newIndex
-                  ? oldIndex + 1
-                  : lesson.order,
+            order: index === oldIndex ? newIndex + 1 : index === newIndex ? oldIndex + 1 : lesson.order,
           })),
         });
         toast({
@@ -215,6 +209,7 @@ const SortableChapter = ({
                     key={lesson._id}
                     lesson={lesson}
                     setConfirmingDeleteLesson={setConfirmingDeleteLesson}
+                    courseId={courseId}
                   />
                 ))
               ) : (
@@ -233,28 +228,22 @@ const SortableChapter = ({
 
 export default function CourseDetailPage() {
   const { id } = useParams<{ id: Id<"courses"> }>();
+  const searchParams = useSearchParams();
   const course = useQuery(api.courses.getCourseById, id ? { id } : "skip");
-  const chapters = useQuery(
-    api.chapters.getCourseStructure,
-    id ? { courseId: id } : "skip"
-  );
+  const chapters = useQuery(api.chapters.getCourseStructure, id ? { courseId: id } : "skip");
   const createChapter = useMutation(api.chapters.createChapter);
   const updateChapterOrder = useMutation(api.chapters.updateChapterOrder);
   const deleteChapter = useMutation(api.chapters.deleteChapter);
   const createLesson = useMutation(api.lessons.createLesson);
   const deleteLesson = useMutation(api.lessons.deleteLesson);
-  const [view, setView] = useState<"basic" | "structure">("basic");
+  const initialView = (searchParams.get("view") || "basic") as "basic" | "structure";
+  const [view, setView] = useState<"basic" | "structure">(initialView);
   const [isCreatingChapter, setIsCreatingChapter] = useState(false);
   const [chapterTitle, setChapterTitle] = useState("");
-  const [creatingLessonChapterId, setCreatingLessonChapterId] =
-    useState<Id<"chapters"> | null>(null);
+  const [creatingLessonChapterId, setCreatingLessonChapterId] = useState<Id<"chapters"> | null>(null);
   const [lessonTitle, setLessonTitle] = useState("");
-  const [confirmingDeleteChapterId, setConfirmingDeleteChapterId] =
-    useState<Id<"chapters"> | null>(null);
-  const [confirmingDeleteLesson, setConfirmingDeleteLesson] = useState<{
-    id: Id<"lessons">;
-    title: string;
-  } | null>(null);
+  const [confirmingDeleteChapterId, setConfirmingDeleteChapterId] = useState<Id<"chapters"> | null>(null);
+  const [confirmingDeleteLesson, setConfirmingDeleteLesson] = useState<{ id: Id<"lessons">; title: string } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -266,7 +255,7 @@ export default function CourseDetailPage() {
   const handleCreateChapter = async () => {
     setIsCreatingChapter(true);
     setChapterTitle("");
-  };
+  }; 
 
   const handleSaveChapter = async () => {
     if (!id || !chapterTitle.trim()) {
@@ -334,21 +323,14 @@ export default function CourseDetailPage() {
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (active.id !== over?.id && over?.id && chapters) {
-      const oldIndex = chapters.findIndex(
-        (chapter) => chapter._id === active.id
-      );
+      const oldIndex = chapters.findIndex((chapter) => chapter._id === active.id);
       const newIndex = chapters.findIndex((chapter) => chapter._id === over.id);
       try {
         await updateChapterOrder({
           courseId: id,
           chapters: chapters.map((chapter, index) => ({
             _id: chapter._id,
-            order:
-              index === oldIndex
-                ? newIndex + 1
-                : index === newIndex
-                  ? oldIndex + 1
-                  : chapter.order,
+            order: index === oldIndex ? newIndex + 1 : index === newIndex ? oldIndex + 1 : chapter.order,
           })),
         });
         toast({
@@ -547,8 +529,7 @@ export default function CourseDetailPage() {
                             <Label className="text-lg text-[#2a7b7b]">
                               What would you like to name your chapter?
                             </Label>
-                            <br />
-                            <br />
+                            <br /><br />
                             <Label className="text-sm font-semibold text-[#195a5a]">
                               Name
                             </Label>
@@ -591,8 +572,7 @@ export default function CourseDetailPage() {
                             <Label className="text-lg text-[#2a7b7b]">
                               What would you like to name your lesson?
                             </Label>
-                            <br />
-                            <br />
+                            <br /><br />
                             <Label className="text-sm font-semibold text-[#195a5a]">
                               Name
                             </Label>
@@ -633,13 +613,8 @@ export default function CourseDetailPage() {
                         <CardContent className="space-y-4">
                           <p className="text-lg text-[#2a7b7b]">
                             Are you sure you want to delete &quot;
-                            {
-                              chapters?.find(
-                                (c) => c._id === confirmingDeleteChapterId
-                              )?.title
-                            }
-                            &quot;? This will also delete all associated
-                            lessons.
+                            {chapters?.find((c) => c._id === confirmingDeleteChapterId)?.title}&quot;?
+                            This will also delete all associated lessons.
                           </p>
                           <div className="flex justify-end gap-2">
                             <Button
@@ -652,9 +627,7 @@ export default function CourseDetailPage() {
                             <Button
                               variant="destructive"
                               className="bg-red-500/80 hover:bg-red-600"
-                              onClick={() =>
-                                handleDeleteChapter(confirmingDeleteChapterId)
-                              }
+                              onClick={() => handleDeleteChapter(confirmingDeleteChapterId)}
                             >
                               Delete
                             </Button>
@@ -673,8 +646,7 @@ export default function CourseDetailPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <p className="text-lg text-[#2a7b7b]">
-                            Are you sure you want to delete &quot;
-                            {confirmingDeleteLesson.title}&quot;?
+                            Are you sure you want to delete &quot;{confirmingDeleteLesson.title}&quot;?
                           </p>
                           <div className="flex justify-end gap-2">
                             <Button
@@ -687,9 +659,7 @@ export default function CourseDetailPage() {
                             <Button
                               variant="destructive"
                               className="bg-red-500/80 hover:bg-red-600"
-                              onClick={() =>
-                                handleDeleteLesson(confirmingDeleteLesson.id)
-                              }
+                              onClick={() => handleDeleteLesson(confirmingDeleteLesson.id)}
                             >
                               Delete
                             </Button>
@@ -715,16 +685,11 @@ export default function CourseDetailPage() {
                               <SortableChapter
                                 key={chapter._id}
                                 chapter={chapter}
-                                setCreatingLessonChapterId={
-                                  setCreatingLessonChapterId
-                                }
+                                setCreatingLessonChapterId={setCreatingLessonChapterId}
                                 setLessonTitle={setLessonTitle}
-                                setConfirmingDeleteChapterId={
-                                  setConfirmingDeleteChapterId
-                                }
-                                setConfirmingDeleteLesson={
-                                  setConfirmingDeleteLesson
-                                }
+                                setConfirmingDeleteChapterId={setConfirmingDeleteChapterId}
+                                setConfirmingDeleteLesson={setConfirmingDeleteLesson}
+                                courseId={id}
                               />
                             ))
                           ) : (
@@ -757,3 +722,5 @@ export default function CourseDetailPage() {
     </div>
   );
 }
+
+
