@@ -1,4 +1,3 @@
-
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
@@ -126,5 +125,26 @@ export const deleteLesson = mutation({
     }
 
     return true;
+  },
+});
+
+export const getCourseLessonsCount = query({
+  args: { courseId: v.id("courses") },
+  handler: async (ctx, args) => {
+    const chapters = await ctx.db
+      .query("chapters")
+      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
+      .collect();
+
+    let total = 0;
+    for (const chapter of chapters) {
+      const lessons = await ctx.db
+        .query("lessons")
+        .withIndex("by_chapter", (q) => q.eq("chapterId", chapter._id))
+        .collect();
+      total += lessons.length;
+    }
+
+    return total;
   },
 });

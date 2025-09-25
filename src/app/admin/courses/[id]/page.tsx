@@ -231,6 +231,7 @@ export default function CourseDetailPage() {
   const searchParams = useSearchParams();
   const course = useQuery(api.courses.getCourseById, id ? { id } : "skip");
   const chapters = useQuery(api.chapters.getCourseStructure, id ? { courseId: id } : "skip");
+  const totalLessons = useQuery(api.lessons.getCourseLessonsCount, id ? { courseId: id } : "skip");
   const createChapter = useMutation(api.chapters.createChapter);
   const updateChapterOrder = useMutation(api.chapters.updateChapterOrder);
   const deleteChapter = useMutation(api.chapters.deleteChapter);
@@ -251,6 +252,8 @@ export default function CourseDetailPage() {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  const totalChapters = chapters?.length || 0;
 
   const handleCreateChapter = async () => {
     setIsCreatingChapter(true);
@@ -433,27 +436,53 @@ export default function CourseDetailPage() {
                 Course Structure
               </Button>
             </div>
-            {course.thumbnail && (
-              <div className="w-full h-48 relative">
-                <Image
-                  src={course.thumbnail}
-                  alt={`${course.title} thumbnail`}
-                  fill
-                  className="object-cover rounded-lg shadow-md"
-                />
-              </div>
-            )}
             {view === "basic" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <BookOpen className="text-[#195a5a] w-6 h-6" />
-                    <div className="text-lg text-[#2a7b7b]">
-                      <strong>Description:</strong>
-                      <div
-                        className="mt-2"
-                        dangerouslySetInnerHTML={{ __html: course.description }}
+              <div className="space-y-6">
+                {course.thumbnail && (
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="md:w-2/3 relative h-64 rounded-lg shadow-md overflow-hidden">
+                      <Image
+                        src={course.thumbnail}
+                        alt={`${course.title} thumbnail`}
+                        fill
+                        className="object-cover"
                       />
+                    </div>
+                    <Card className="md:w-1/3 border border-[#195a5a]/20 bg-white/70 shadow-md rounded-lg p-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <DollarSign className="text-[#195a5a] w-6 h-6" />
+                          <p className="text-lg text-[#2a7b7b]">
+                            <strong>Price:</strong> ${course.price}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <User className="text-[#195a5a] w-6 h-6" />
+                          <p className="text-lg text-[#2a7b7b]">
+                            <strong>Level:</strong> {course.level}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Info className="text-[#195a5a] w-6 h-6" />
+                          <p className="text-lg text-[#2a7b7b]">
+                            <strong>Status:</strong> {course.status}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <BookOpen className="text-[#195a5a] w-6 h-6" />
+                      <div className="text-lg text-[#2a7b7b]">
+                        <strong>Description:</strong>
+                        <div
+                          className="mt-2"
+                          dangerouslySetInnerHTML={{ __html: course.description }}
+                        />
+                      </div>
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -471,29 +500,37 @@ export default function CourseDetailPage() {
                     </div>
                   </div>
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <DollarSign className="text-[#195a5a] w-6 h-6" />
-                    <p className="text-lg text-[#2a7b7b]">
-                      <strong>Price:</strong> ${course.price}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <User className="text-[#195a5a] w-6 h-6" />
-                    <p className="text-lg text-[#2a7b7b]">
-                      <strong>Level:</strong> {course.level}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Info className="text-[#195a5a] w-6 h-6" />
-                    <p className="text-lg text-[#2a7b7b]">
-                      <strong>Status:</strong> {course.status}
-                    </p>
-                  </div>
-                </div>
               </div>
             ) : (
               <div className="space-y-6">
+                {course.thumbnail && (
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="md:w-2/3 relative h-64 rounded-lg shadow-md overflow-hidden">
+                      <Image
+                        src={course.thumbnail}
+                        alt={`${course.title} thumbnail`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <Card className="md:w-1/3 border border-[#195a5a]/20 bg-white/70 shadow-md rounded-lg p-6">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <Folder className="text-[#195a5a] w-6 h-6" />
+                          <p className="text-lg text-[#2a7b7b]">
+                            <strong>Chapters:</strong> {totalChapters}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <FileText className="text-[#195a5a] w-6 h-6" />
+                          <p className="text-lg text-[#2a7b7b]">
+                            <strong>Lessons:</strong> {totalLessons || 0}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                )}
                 <div className="text-center space-y-4">
                   <h2 className="text-2xl font-bold text-[#195a5a]">
                     Course Structure
@@ -722,5 +759,3 @@ export default function CourseDetailPage() {
     </div>
   );
 }
-
-
