@@ -1,3 +1,4 @@
+// src/app/(dashboard)/page.tsx
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,7 @@ export default function LandingPage() {
             variant="secondary"
             className="bg-white text-[#195a5a] hover:bg-white/90 hover:scale-105 transition-all duration-300 shadow-lg"
           >
-            <Link href="/courses">Explore Courses</Link>
+            <Link href="/admin/courses/create">Explore Courses</Link>
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl w-full">
@@ -98,5 +99,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
-
