@@ -137,3 +137,10 @@ export const getPublishedCourses = query({
     return coursesWithCreators;
   },
 });
+
+export const getAllCoursesCount = query({
+  args: {},
+  handler: async (ctx) => {
+    return (await ctx.db.query("courses").collect()).length;
+  },
+});

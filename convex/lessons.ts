@@ -148,3 +148,10 @@ export const getCourseLessonsCount = query({
     return total;
   },
 });
+
+export const getAllLessonsCount = query({
+  args: {},
+  handler: async (ctx) => {
+    return (await ctx.db.query("lessons").collect()).length;
+  },
+});

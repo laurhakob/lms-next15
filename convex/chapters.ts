@@ -1,4 +1,3 @@
-
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
@@ -121,5 +120,12 @@ export const deleteChapter = mutation({
     }
 
     return true;
+  },
+});
+
+export const getAllChaptersCount = query({
+  args: {},
+  handler: async (ctx) => {
+    return (await ctx.db.query("chapters").collect()).length;
   },
 });

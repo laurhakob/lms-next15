@@ -13,4 +13,9 @@ export const current = query({
   },
 });
 
-
+export const getAllUsersCount = query({
+  args: {},
+  handler: async (ctx) => {
+    return (await ctx.db.query("users").collect()).length;
+  },
+});
