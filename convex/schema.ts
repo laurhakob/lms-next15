@@ -1,4 +1,5 @@
 
+
 // convex/schema.ts
 import { defineSchema, defineTable } from "convex/server";
 import { authTables } from "@convex-dev/auth/server";
@@ -30,6 +31,11 @@ const schema = defineSchema({
     video: v.optional(v.id("_storage")),
     order: v.number(),
   }).index("by_chapter", ["chapterId"]),
+  progress: defineTable({
+    userId: v.id("users"),
+    lessonId: v.id("lessons"),
+    completed: v.boolean(),
+  }).index("by_user_lesson", ["userId", "lessonId"]),
 });
 
 export default schema;
