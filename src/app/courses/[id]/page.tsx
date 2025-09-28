@@ -2,8 +2,7 @@
 "use client";
 
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+
 import { useParams, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Play, ChevronDown, CheckCircle } from "lucide-react";
@@ -12,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useState, useEffect } from "react";
 import { toast } from "@/hooks/use-toast";
+import { api } from "../../../../convex/_generated/api";
+import { Id } from "../../../../convex/_generated/dataModel";
 
 export default function CourseWatchPage() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function CourseWatchPage() {
   const searchParams = useSearchParams();
   const course = useQuery(api.courses.getCourseById, { id: params.id });
   const chapters = useQuery(api.chapters.getCourseStructure, { courseId: params.id });
+  const lessons = useQuery(api.lessons.getCourseLessons, { courseId: params.id });
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
   const [selectedLessonId, setSelectedLessonId] = useState<Id<"lessons"> | null>(null);
 
@@ -27,8 +29,11 @@ export default function CourseWatchPage() {
   useEffect(() => {
     if (initialLessonId) {
       setSelectedLessonId(initialLessonId);
+    } else if (lessons && lessons.length > 0 && !selectedLessonId) {
+      setSelectedLessonId(lessons[0]._id);
+      setExpandedChapters(new Set([lessons[0].chapterId]));
     }
-  }, [initialLessonId]);
+  }, [initialLessonId, lessons, selectedLessonId]);
 
   const selectedLesson = useQuery(
     api.lessons.getLessonById,

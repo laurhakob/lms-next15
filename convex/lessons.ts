@@ -59,6 +59,28 @@ export const getChapterStructure = query({
   },
 });
 
+export const getCourseLessons = query({
+  args: { courseId: v.id("courses") },
+  handler: async (ctx, args) => {
+    const chapters = await ctx.db
+      .query("chapters")
+      .withIndex("by_course", (q) => q.eq("courseId", args.courseId))
+      .collect();
+
+    const lessons = [];
+    for (const chapter of chapters) {
+      const chapterLessons = await ctx.db
+        .query("lessons")
+        .withIndex("by_chapter", (q) => q.eq("chapterId", chapter._id))
+        .order("asc")
+        .collect();
+      lessons.push(...chapterLessons.map(l => ({...l, chapterId: chapter._id})));
+    }
+
+    return lessons;
+  },
+});
+
 export const updateLessonOrder = mutation({
   args: {
     chapterId: v.id("chapters"),
