@@ -1,4 +1,3 @@
-
 "use client";
 
 import { ArrowRight } from "lucide-react";
@@ -708,6 +707,7 @@ export default function CourseDetailPage() {
                         index={index}
                         isExpanded={expandedChapters.has(chapter._id)}
                         onToggle={() => toggleChapter(chapter._id)}
+                        watchCourseId={id}
                       />
                     ))
                   ) : (
