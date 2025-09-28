@@ -48,6 +48,10 @@ export default function CourseWatchPage() {
   const isCompleted = selectedLessonId ? progressMap.get(selectedLessonId) || false : false;
   const toggleLessonCompletion = useMutation(api.progress.toggleLessonCompletion);
 
+  const completed = courseProgress?.filter(p => p.completed).length || 0;
+  const total = lessons?.length || 0;
+  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
   const handleToggleComplete = async (lessonId: Id<"lessons">) => {
     try {
       await toggleLessonCompletion({ lessonId });
@@ -109,13 +113,24 @@ export default function CourseWatchPage() {
         </CardHeader>
         <CardContent className="p-6 space-y-6 flex-grow flex flex-row">
           {/* Left side: Sidebar with chapters */}
-          <div className="w-1/4 pr-6 border-r border-[#195a5a]/20">
+          <div className="w-1/4 pr-6 border-r border-[#195a5a]/20 bg-[#f0f9f9]">
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-1">
                 <Play className="w-6 h-6 text-[#195a5a]" />
                 <h2 className="text-2xl font-bold text-[#195a5a]">{course.title}</h2>
               </div>
               <p className="text-sm text-[#2a7b7b]/60">{course.category}</p>
+              <div className="flex items-center gap-2 mt-4">
+                <span className="font-semibold text-lg text-[#195a5a]">Progress:</span>
+                <span className="text-lg text-[#195a5a]">{completed}/{total}</span>
+              </div>
+              <div className="mt-2 bg-gray-200 rounded-full h-2.5 w-full">
+                <div 
+                  className="bg-[#195a5a] h-2.5 rounded-full" 
+                  style={{ width: `${percentage}%` }}
+                ></div>
+              </div>
+              <p className="text-center mt-1 text-lg font-bold text-[#195a5a]">{percentage}%</p>
             </div>
             <Separator className="mb-4 bg-[#195a5a]/20" />
             <div className="space-y-4">
@@ -136,7 +151,7 @@ export default function CourseWatchPage() {
           </div>
           
           {/* Right side: Main content */}
-          <div className="w-3/4 pl-6 flex flex-col space-y-6">
+          <div className="w-3/4 pl-6 flex flex-col space-y-6 bg-white">
             {selectedLessonId && selectedLesson ? (
               <div className="space-y-6">
                 {videoUrl ? (
