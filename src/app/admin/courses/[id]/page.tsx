@@ -48,6 +48,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
+import { useCurrentUser } from "@/features/auth/api/use-current-user";
 
 // Expandable ChapterCard component for both views
 const ExpandableChapterCard = ({ 
@@ -58,6 +59,7 @@ const ExpandableChapterCard = ({
   onDeleteChapter,
   onDeleteLesson,
   courseId,
+  watchCourseId,
   isExpanded,
   onToggle
 }: { 
@@ -68,6 +70,7 @@ const ExpandableChapterCard = ({
   onDeleteChapter?: (chapterId: Id<"chapters">) => void;
   onDeleteLesson?: (lessonId: Id<"lessons">, title: string) => void;
   courseId?: Id<"courses">;
+  watchCourseId?: Id<"courses">;
   isExpanded?: boolean;
   onToggle?: () => void;
 }) => {
@@ -125,6 +128,7 @@ const ExpandableChapterCard = ({
               isEditable={isEditable}
               onDeleteLesson={onDeleteLesson}
               courseId={courseId}
+              watchCourseId={watchCourseId}
             />
           ))}
         </div>
@@ -140,12 +144,14 @@ const LessonCard = ({
   isEditable,
   onDeleteLesson,
   courseId,
+  watchCourseId,
 }: {
   lesson: { _id: Id<"lessons">; title: string; order: number };
   lessonIndex: number;
   isEditable: boolean;
   onDeleteLesson?: (lessonId: Id<"lessons">, title: string) => void;
   courseId?: Id<"courses">;
+  watchCourseId?: Id<"courses">;
 }) => {
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -172,7 +178,15 @@ const LessonCard = ({
     </div>
   );
 
-  if (isEditable && courseId) {
+  if (watchCourseId) {
+    return (
+      <Link href={`/courses/${watchCourseId}?lesson=${lesson._id}`}>
+        <Card className="border border-[#195a5a]/10 bg-white/80 shadow-sm rounded-md p-3 transition-all duration-300 hover:shadow-md cursor-pointer">
+          {content}
+        </Card>
+      </Link>
+    );
+  } else if (isEditable && courseId) {
     return (
       <Link href={`/admin/courses/${courseId}/lessons/${lesson._id}`}>
         <Card className="border border-[#195a5a]/10 bg-white/80 shadow-sm rounded-md p-3 transition-all duration-300 hover:shadow-md cursor-pointer">
@@ -180,13 +194,13 @@ const LessonCard = ({
         </Card>
       </Link>
     );
+  } else {
+    return (
+      <Card className="border border-[#195a5a]/10 bg-white/80 shadow-sm rounded-md p-3 transition-all duration-300 hover:shadow-md cursor-pointer">
+        {content}
+      </Card>
+    );
   }
-
-  return (
-    <Card className="border border-[#195a5a]/10 bg-white/80 shadow-sm rounded-md p-3 transition-all duration-300 hover:shadow-md cursor-pointer">
-      {content}
-    </Card>
-  );
 };
 
 // SortableLesson component for editable view
@@ -398,6 +412,8 @@ export default function CourseDetailPage() {
   const [confirmingDeleteChapterId, setConfirmingDeleteChapterId] = useState<Id<"chapters"> | null>(null);
   const [confirmingDeleteLesson, setConfirmingDeleteLesson] = useState<{ id: Id<"lessons">; title: string } | null>(null);
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
+  const { data: currentUser } = useCurrentUser();
+  const isCreator = currentUser?._id === course?.creatorId;
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -741,23 +757,25 @@ export default function CourseDetailPage() {
                     Course Structure
                   </h2>
                   <p className="text-lg text-[#2a7b7b]">
-                    Organize and manage your course chapters.
+                    {isCreator ? "Organize and manage your course chapters." : "View the course structure."}
                   </p>
                 </div>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-semibold text-[#195a5a]">
-                      Chapters
-                    </h3>
-                    <Button
-                      variant="outline"
-                      className="border-[#195a5a]/30 bg-white/80 text-[#195a5a] hover:bg-[#195a5a] hover:text-white transition-all duration-300 shadow-sm"
-                      onClick={handleCreateChapter}
-                    >
-                      <PlusIcon className="w-5 h-5 mr-2" />
-                      Create Chapter
-                    </Button>
-                  </div>
+                  {isCreator && (
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xl font-semibold text-[#195a5a]">
+                        Chapters
+                      </h3>
+                      <Button
+                        variant="outline"
+                        className="border-[#195a5a]/30 bg-white/80 text-[#195a5a] hover:bg-[#195a5a] hover:text-white transition-all duration-300 shadow-sm"
+                        onClick={handleCreateChapter}
+                      >
+                        <PlusIcon className="w-5 h-5 mr-2" />
+                        Create Chapter
+                      </Button>
+                    </div>
+                  )}
                   {isCreatingChapter && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                       <Card className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
@@ -912,36 +930,55 @@ export default function CourseDetailPage() {
                   )}
                   <Card className="border border-[#195a5a]/20 bg-white/80 shadow-md rounded-xl overflow-hidden">
                     <CardContent className="p-4">
-                      <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        onDragEnd={handleDragEnd}
-                        modifiers={[restrictToVerticalAxis]}
-                      >
-                        <SortableContext
-                          items={chapters?.map((c) => c._id) || []}
-                          strategy={verticalListSortingStrategy}
+                      {isCreator ? (
+                        <DndContext
+                          sensors={sensors}
+                          collisionDetection={closestCenter}
+                          onDragEnd={handleDragEnd}
+                          modifiers={[restrictToVerticalAxis]}
                         >
+                          <SortableContext
+                            items={chapters?.map((c) => c._id) || []}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            {chapters && chapters.length > 0 ? (
+                              chapters.map((chapter) => (
+                                <SortableChapter
+                                  key={chapter._id}
+                                  chapter={chapter}
+                                  setCreatingLessonChapterId={setCreatingLessonChapterId}
+                                  setLessonTitle={setLessonTitle}
+                                  setConfirmingDeleteChapterId={setConfirmingDeleteChapterId}
+                                  setConfirmingDeleteLesson={setConfirmingDeleteLesson}
+                                  courseId={id}
+                                />
+                              ))
+                            ) : (
+                              <p className="text-center text-[#195a5a]/80">
+                                No chapters created yet. Click Create Chapter to
+                                get started.
+                              </p>
+                            )}
+                          </SortableContext>
+                        </DndContext>
+                      ) : (
+                        <div className="space-y-4">
                           {chapters && chapters.length > 0 ? (
-                            chapters.map((chapter) => (
-                              <SortableChapter
-                                key={chapter._id}
-                                chapter={chapter}
-                                setCreatingLessonChapterId={setCreatingLessonChapterId}
-                                setLessonTitle={setLessonTitle}
-                                setConfirmingDeleteChapterId={setConfirmingDeleteChapterId}
-                                setConfirmingDeleteLesson={setConfirmingDeleteLesson}
-                                courseId={id}
+                            chapters.map((chapter, index) => (
+                              <ExpandableChapterCard 
+                                key={chapter._id} 
+                                chapter={chapter} 
+                                index={index}
+                                isExpanded={expandedChapters.has(chapter._id)}
+                                onToggle={() => toggleChapter(chapter._id)}
+                                watchCourseId={id}
                               />
                             ))
                           ) : (
-                            <p className="text-center text-[#195a5a]/80">
-                              No chapters created yet. Click Create Chapter to
-                              get started.
-                            </p>
+                            <p className="text-center text-[#195a5a]/80">No chapters available yet.</p>
                           )}
-                        </SortableContext>
-                      </DndContext>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
