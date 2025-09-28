@@ -1,3 +1,5 @@
+
+
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
@@ -6,6 +8,8 @@ export const createLesson = mutation({
   args: {
     chapterId: v.id("chapters"),
     title: v.string(),
+    description: v.optional(v.string()),
+    video: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -33,6 +37,8 @@ export const createLesson = mutation({
     const lessonId = await ctx.db.insert("lessons", {
       chapterId: args.chapterId,
       title: args.title,
+      description: args.description,
+      video: args.video,
       order,
     });
 
@@ -128,6 +134,39 @@ export const deleteLesson = mutation({
   },
 });
 
+export const updateLesson = mutation({
+  args: {
+    id: v.id("lessons"),
+    title: v.optional(v.string()),
+    description: v.optional(v.string()),
+    video: v.optional(v.union(v.id("_storage"), v.null())),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+    const lesson = await ctx.db.get(args.id);
+    if (!lesson) {
+      throw new Error("Lesson not found");
+    }
+    const chapter = await ctx.db.get(lesson.chapterId);
+    if (!chapter) {
+      throw new Error("Chapter not found");
+    }
+    const course = await ctx.db.get(chapter.courseId);
+    if (!course || course.creatorId !== userId) {
+      throw new Error("Not authorized to update this lesson");
+    }
+    await ctx.db.patch(args.id, {
+      ...(args.title !== undefined ? {title: args.title} : {}),
+      ...(args.description !== undefined ? {description: args.description} : {}),
+      ...(args.video !== undefined ? {video: args.video ?? undefined} : {}),
+    });
+    return args.id;
+  },
+});
+
 export const getCourseLessonsCount = query({
   args: { courseId: v.id("courses") },
   handler: async (ctx, args) => {
@@ -153,5 +192,24 @@ export const getAllLessonsCount = query({
   args: {},
   handler: async (ctx) => {
     return (await ctx.db.query("lessons").collect()).length;
+  },
+});
+
+export const getLessonById = query({
+  args: { id: v.id("lessons") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id);
+  },
+});
+
+export const generateUploadUrl = mutation(async (ctx) => {
+  return await ctx.storage.generateUploadUrl();
+});
+
+export const getVideoUrl = query({
+  args: { storageId: v.optional(v.id("_storage")) },
+  handler: async (ctx, args) => {
+    if (!args.storageId) return null;
+    return await ctx.storage.getUrl(args.storageId);
   },
 });

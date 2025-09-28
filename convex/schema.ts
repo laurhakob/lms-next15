@@ -26,6 +26,8 @@ const schema = defineSchema({
   lessons: defineTable({
     chapterId: v.id("chapters"),
     title: v.string(),
+    description: v.optional(v.string()),
+    video: v.optional(v.id("_storage")),
     order: v.number(),
   }).index("by_chapter", ["chapterId"]),
 });
