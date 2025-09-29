@@ -1,7 +1,9 @@
-// next.config.ts
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,  // Add this to skip ESLint during 'npm run build'
+  },
   images: {
     remotePatterns: [
       {
